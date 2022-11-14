@@ -142,10 +142,9 @@ def edit_staff_save(request):
             user = CustomUser.objects.get(id=staff_id)
             user_email = CustomUser.objects.filter(
                 email=email).values_list('id', flat=True)
-            print(list(user_email), staff_id)
+
             for u in user_email:
                 if str(u) != staff_id:
-                    # print(type(u),type(staff_id))
                     raise Exception("Email invalid!")
             user.first_name = first_name
             user.last_name = last_name
@@ -454,7 +453,6 @@ def edit_student_save(request):
                     email=email).values_list('id', flat=True)
                 for u in user_email:
                     if str(u) != student_id:
-                        # print(type(u),type(staff_id))
                         raise Exception("Email invalid!")
                 user.first_name = first_name
                 user.last_name = last_name
@@ -501,7 +499,6 @@ def add_subject(request):
     courses = Courses.objects.all()
     room_areas = RoomArea.objects.all()
     staffs = CustomUser.objects.filter(user_type='2')
-    print(staffs)
     context = {
         "courses": courses,
         "staffs": staffs,
@@ -529,11 +526,16 @@ def add_subject_save(request):
         room_area = RoomArea.objects.get(id=room_area_id)
 
         try:
+            existed_subject = Subjects.objects.filter(date=date, time=time)
+            if existed_subject:
+                for s in existed_subject:
+                    if s.staff_id == staff or s.room_area_name_id == room_area :
+                        raise Exception("Subject invalid")
             subject = Subjects(subject_name=subject_name, course_id=course,
                                staff_id=staff, room_area_name_id=room_area, time=time, date=date)
             subject.save()
             messages.success(request, "Subject Added Successfully!")
-            return redirect('add_subject')
+            return redirect('manage_subject')
         except:
             messages.error(request, "Failed to Add Subject!")
             return redirect('add_subject')
@@ -575,6 +577,12 @@ def edit_subject_save(request):
         try:
             subject = Subjects.objects.get(id=subject_id)
             subject.subject_name = subject_name
+            existed_subject = Subjects.objects.filter(date=subject.date, time=subject.time)
+            if existed_subject:
+                for s in existed_subject:
+                    if str(s.id) != subject_id:
+                        if s.staff_id == CustomUser.objects.get(id=staff_id) or s.room_area_name_id == RoomArea.objects.get(id=room_area_id) :
+                            raise Exception("Subject invalid")
 
             course = Courses.objects.get(id=course_id)
             subject.course_id = course
@@ -588,8 +596,8 @@ def edit_subject_save(request):
             subject.save()
 
             messages.success(request, "Subject Updated Successfully.")
-            # return redirect('/edit_subject/'+subject_id)
-            return HttpResponseRedirect(reverse("edit_subject", kwargs={"subject_id": subject_id}))
+            return redirect('/manage_subject')
+            # return HttpResponseRedirect(reverse("edit_subject", kwargs={"subject_id": subject_id}))
 
         except:
             messages.error(request, "Failed to Update Subject.")
