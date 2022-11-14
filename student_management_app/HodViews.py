@@ -338,7 +338,7 @@ def add_student_save(request):
         return redirect('add_student')
     else:
         form = AddStudentForm(request.POST, request.FILES)
-
+        
         if form.is_valid():
             first_name = form.cleaned_data['first_name']
             last_name = form.cleaned_data['last_name']
@@ -349,7 +349,7 @@ def add_student_save(request):
             session_year_id = form.cleaned_data['session_year_id']
             course_id = form.cleaned_data['course_id']
             gender = form.cleaned_data['gender']
-
+            
             # Getting Profile Pic first
             # First Check whether the file is selected or not
             # Upload only if file is selected
@@ -365,18 +365,13 @@ def add_student_save(request):
             try:
                 user = CustomUser.objects.create_user(username=username, password=password, email=email, first_name=first_name, last_name=last_name, user_type=3)
                 user.students.address = address
-
-                course_obj = Courses.objects.get(id=course_id)
-                user.students.course_id = course_obj
-
-                session_year_obj = SessionYearModel.objects.get(id=session_year_id)
-                user.students.session_year_id = session_year_obj
-
+                user.students.course_id = course_id
+                user.students.session_year_id = session_year_id
                 user.students.gender = gender
                 user.students.profile_pic = profile_pic_url
                 user.save()
                 messages.success(request, "Student Added Successfully!")
-                return redirect('add_student')
+                return redirect('manage_student')
             except:
                 messages.error(request, "Failed to Add Student!")
                 return redirect('add_student')
@@ -404,13 +399,14 @@ def edit_student(request, student_id):
     form.fields['first_name'].initial = student.admin.first_name
     form.fields['last_name'].initial = student.admin.last_name
     form.fields['address'].initial = student.address
-    form.fields['course_id'].initial = student.course_id.id
+    form.fields['course_id'].initial = student.course_id
     form.fields['gender'].initial = student.gender
-    form.fields['session_year_id'].initial = student.session_year_id.id
+    form.fields['session_year_id'].initial = student.session_year_id
 
     context = {
         "id": student_id,
         "username": student.admin.username,
+        "email": student.admin.email,
         "form": form
     }
     return render(request, "hod_template/edit_student_template.html", context)
@@ -449,6 +445,11 @@ def edit_student_save(request):
             try:
                 # First Update into Custom User Model
                 user = CustomUser.objects.get(id=student_id)
+                user_email = CustomUser.objects.filter(email=email).values_list('id', flat=True)
+                for u in user_email:
+                    if str(u) != student_id:
+                        # print(type(u),type(staff_id))
+                        raise Exception("Email invalid!")
                 user.first_name = first_name
                 user.last_name = last_name
                 user.email = email
@@ -458,12 +459,8 @@ def edit_student_save(request):
                 # Then Update Students Table
                 student_model = Students.objects.get(admin=student_id)
                 student_model.address = address
-
-                course = Courses.objects.get(id=course_id)
-                student_model.course_id = course
-
-                session_year_obj = SessionYearModel.objects.get(id=session_year_id)
-                student_model.session_year_id = session_year_obj
+                student_model.course_id = course_id
+                student_model.session_year_id = session_year_id
 
                 student_model.gender = gender
                 if profile_pic_url != None:
@@ -473,9 +470,9 @@ def edit_student_save(request):
                 del request.session['student_id']
 
                 messages.success(request, "Student Updated Successfully!")
-                return redirect('/edit_student/'+student_id)
+                return redirect('manage_student')
             except:
-                messages.success(request, "Failed to Uupdate Student.")
+                messages.success(request, "Failed to Update Student.")
                 return redirect('/edit_student/'+student_id)
         else:
             return redirect('/edit_student/'+student_id)
@@ -483,8 +480,10 @@ def edit_student_save(request):
 
 def delete_student(request, student_id):
     student = Students.objects.get(admin=student_id)
+    student_account = CustomUser.objects.get(id=student_id)
     try:
         student.delete()
+        student_account.delete()
         messages.success(request, "Student Deleted Successfully.")
         return redirect('manage_student')
     except:
