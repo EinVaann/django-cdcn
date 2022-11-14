@@ -729,10 +729,12 @@ def add_room_area_save(request):
         room_area_name = request.POST.get('room_area_name')
 
         try:
+            if RoomArea.objects.get(room_area_name=room_area_name):
+                raise Exception("Room is already existed!")
             roomarea = RoomArea(room_area_name=room_area_name)
             roomarea.save()
             messages.success(request, "Room Area added Successfully!")
-            return redirect("add_room_area")
+            return redirect("manage_room_area")
         except:
             messages.error(request, "Failed to Add Room Area Year")
             return redirect("add_room_area")
@@ -755,12 +757,16 @@ def edit_room_area_save(request):
         room_area_name = request.POST.get('room_area_name')
 
         try:
+            rooms = RoomArea.objects.filter(room_area_name=room_area_name)
+            for room in rooms:
+                if str(room.id)!=room_area_id:
+                    raise Exception("Room is already existed!")
             room_area = RoomArea.objects.get(id=room_area_id)
             room_area.room_area_name = room_area_name
             room_area.save()
 
             messages.success(request, "Room Area Updated Successfully.")
-            return redirect('/edit_room_area/'+room_area_id)
+            return redirect('manage_room_area')
         except:
             messages.error(request, "Failed to Update Room Area.")
             return redirect('/edit_room_area/'+room_area_id)
