@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.contrib import messages
-from django.core.files.storage import FileSystemStorage #To upload Profile Picture
+from django.core.files.storage import FileSystemStorage  # To upload Profile Picture
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.core import serializers
@@ -29,7 +29,7 @@ def admin_home(request):
         course_name_list.append(course.course_name)
         subject_count_list.append(subjects)
         student_count_list_in_course.append(students)
-    
+
     subject_all = Subjects.objects.all()
     subject_list = []
     student_count_list_in_subject = []
@@ -38,11 +38,11 @@ def admin_home(request):
         student_count = Students.objects.filter(course_id=course.id).count()
         subject_list.append(subject.subject_name)
         student_count_list_in_subject.append(student_count)
-    
+
     # For Saffs
-    staff_attendance_present_list=[]
-    staff_attendance_leave_list=[]
-    staff_name_list=[]
+    staff_attendance_present_list = []
+    staff_attendance_leave_list = []
+    staff_name_list = []
 
     staffs = Staffs.objects.all()
     for staff in staffs:
@@ -50,16 +50,15 @@ def admin_home(request):
         staff_name_list.append(staff.admin.first_name)
 
     # For Students
-    student_attendance_present_list=[]
-    student_attendance_leave_list=[]
-    student_name_list=[]
+    student_attendance_present_list = []
+    student_attendance_leave_list = []
+    student_name_list = []
 
     students = Students.objects.all()
     for student in students:
         student_name_list.append(student.admin.first_name)
 
-
-    context={
+    context = {
         "all_student_count": all_student_count,
         "subject_count": subject_count,
         "course_count": course_count,
@@ -96,7 +95,8 @@ def add_staff_save(request):
         address = request.POST.get('address')
 
         try:
-            user = CustomUser.objects.create_user(username=username, password=password, email=email, first_name=first_name, last_name=last_name, user_type=2)
+            user = CustomUser.objects.create_user(
+                username=username, password=password, email=email, first_name=first_name, last_name=last_name, user_type=2)
             user.staffs.address = address
             user.save()
             messages.success(request, "Staff Added Successfully!")
@@ -104,7 +104,6 @@ def add_staff_save(request):
         except:
             messages.error(request, "Failed to Add Staff!")
             return redirect('add_staff')
-
 
 
 def manage_staff(request):
@@ -141,7 +140,8 @@ def edit_staff_save(request):
 
             # INSERTING into Customuser Model
             user = CustomUser.objects.get(id=staff_id)
-            user_email = CustomUser.objects.filter(email=email).values_list('id', flat=True)
+            user_email = CustomUser.objects.filter(
+                email=email).values_list('id', flat=True)
             print(list(user_email), staff_id)
             for u in user_email:
                 if str(u) != staff_id:
@@ -153,7 +153,7 @@ def edit_staff_save(request):
             user.username = username
             # user.staff.address = address
             user.save()
-            
+
             # INSERTING into Staff Model
             staff_model = Staffs.objects.get(admin=staff_id)
             staff_model.address = address
@@ -165,7 +165,6 @@ def edit_staff_save(request):
         except:
             messages.error(request, "Failed to Update Staff.")
             return redirect('/edit_staff/'+staff_id)
-
 
 
 def delete_staff(request, staff_id):
@@ -181,8 +180,6 @@ def delete_staff(request, staff_id):
         return redirect('manage_staff')
 
 
-
-
 def add_course(request):
     return render(request, "hod_template/add_course_template.html")
 
@@ -194,10 +191,14 @@ def add_course_save(request):
     else:
         course = request.POST.get('course')
         try:
+            if (course == ""):
+                raise Exception("Pls fill all information")
+            if Courses.objects.filter(course_name=course):
+                raise Exception("Course is already existed!")
             course_model = Courses(course_name=course)
             course_model.save()
             messages.success(request, "Course Added Successfully!")
-            return redirect('add_course')
+            return redirect('manage_course')
         except:
             messages.error(request, "Failed to Add Course!")
             return redirect('add_course')
@@ -226,14 +227,17 @@ def edit_course_save(request):
     else:
         course_id = request.POST.get('course_id')
         course_name = request.POST.get('course')
-
         try:
+            if (course_name == ""):
+                raise Exception("Pls fill all information")
+            if Courses.objects.filter(course_name=course_name):
+                raise Exception("Course is already existed!")
             course = Courses.objects.get(id=course_id)
             course.course_name = course_name
             course.save()
 
             messages.success(request, "Course Updated Successfully.")
-            return redirect('/edit_course/'+course_id)
+            return redirect('manage_course')
 
         except:
             messages.error(request, "Failed to Update Course.")
@@ -272,7 +276,8 @@ def add_session_save(request):
         session_end_year = request.POST.get('session_end_year')
 
         try:
-            sessionyear = SessionYearModel(session_start_year=session_start_year, session_end_year=session_end_year)
+            sessionyear = SessionYearModel(
+                session_start_year=session_start_year, session_end_year=session_end_year)
             sessionyear.save()
             messages.success(request, "Session Year added Successfully!")
             return redirect("add_session")
@@ -330,15 +335,13 @@ def add_student(request):
     return render(request, 'hod_template/add_student_template.html', context)
 
 
-
-
 def add_student_save(request):
     if request.method != "POST":
         messages.error(request, "Invalid Method")
         return redirect('add_student')
     else:
         form = AddStudentForm(request.POST, request.FILES)
-        
+
         if form.is_valid():
             first_name = form.cleaned_data['first_name']
             last_name = form.cleaned_data['last_name']
@@ -349,7 +352,7 @@ def add_student_save(request):
             session_year_id = form.cleaned_data['session_year_id']
             course_id = form.cleaned_data['course_id']
             gender = form.cleaned_data['gender']
-            
+
             # Getting Profile Pic first
             # First Check whether the file is selected or not
             # Upload only if file is selected
@@ -360,7 +363,6 @@ def add_student_save(request):
                 profile_pic_url = fs.url(filename)
             else:
                 profile_pic_url = None
-
 
             try:
                 user_email = CustomUser.objects.filter(email=email).values_list('id', flat=True)
@@ -448,7 +450,8 @@ def edit_student_save(request):
             try:
                 # First Update into Custom User Model
                 user = CustomUser.objects.get(id=student_id)
-                user_email = CustomUser.objects.filter(email=email).values_list('id', flat=True)
+                user_email = CustomUser.objects.filter(
+                    email=email).values_list('id', flat=True)
                 for u in user_email:
                     if str(u) != student_id:
                         # print(type(u),type(staff_id))
@@ -507,7 +510,6 @@ def add_subject(request):
     return render(request, 'hod_template/add_subject_template.html', context)
 
 
-
 def add_subject_save(request):
     if request.method != "POST":
         messages.error(request, "Method Not Allowed!")
@@ -517,7 +519,7 @@ def add_subject_save(request):
 
         course_id = request.POST.get('course')
         course = Courses.objects.get(id=course_id)
-        
+
         date = request.POST.get('date')
         time = request.POST.get('time')
         staff_id = request.POST.get('staff')
@@ -527,7 +529,8 @@ def add_subject_save(request):
         room_area = RoomArea.objects.get(id=room_area_id)
 
         try:
-            subject = Subjects(subject_name=subject_name, course_id=course, staff_id=staff, room_area_name_id=room_area, time = time, date=date )
+            subject = Subjects(subject_name=subject_name, course_id=course,
+                               staff_id=staff, room_area_name_id=room_area, time=time, date=date)
             subject.save()
             messages.success(request, "Subject Added Successfully!")
             return redirect('add_subject')
@@ -581,18 +584,17 @@ def edit_subject_save(request):
 
             rome_area = RoomArea.objects.get(id=room_area_id)
             subject.room_area_id = rome_area
-  
+
             subject.save()
 
             messages.success(request, "Subject Updated Successfully.")
             # return redirect('/edit_subject/'+subject_id)
-            return HttpResponseRedirect(reverse("edit_subject", kwargs={"subject_id":subject_id}))
+            return HttpResponseRedirect(reverse("edit_subject", kwargs={"subject_id": subject_id}))
 
         except:
             messages.error(request, "Failed to Update Subject.")
-            return HttpResponseRedirect(reverse("edit_subject", kwargs={"subject_id":subject_id}))
+            return HttpResponseRedirect(reverse("edit_subject", kwargs={"subject_id": subject_id}))
             # return redirect('/edit_subject/'+subject_id)
-
 
 
 def delete_subject(request, subject_id):
@@ -623,7 +625,7 @@ def check_username_exist(request):
     if user_obj:
         return HttpResponse(True)
     else:
-        return HttpResponse(False)  
+        return HttpResponse(False)
 
 
 def student_feedback_message(request):
@@ -671,10 +673,11 @@ def staff_feedback_message_reply(request):
     except:
         return HttpResponse("False")
 
+
 def admin_profile(request):
     user = CustomUser.objects.get(id=request.user.id)
 
-    context={
+    context = {
         "user": user
     }
     return render(request, 'hod_template/admin_profile.html', context)
@@ -701,7 +704,6 @@ def admin_profile_update(request):
         except:
             messages.error(request, "Failed to Update Profile")
             return redirect('admin_profile')
-    
 
 
 def staff_profile(request):
@@ -710,6 +712,7 @@ def staff_profile(request):
 
 def student_profile(requtest):
     pass
+
 
 def manage_room_area(request):
     room_areas = RoomArea.objects.all()
@@ -760,7 +763,7 @@ def edit_room_area_save(request):
         try:
             rooms = RoomArea.objects.filter(room_area_name=room_area_name)
             for room in rooms:
-                if str(room.id)!=room_area_id:
+                if str(room.id) != room_area_id:
                     raise Exception("Room is already existed!")
             room_area = RoomArea.objects.get(id=room_area_id)
             room_area.room_area_name = room_area_name
@@ -782,4 +785,3 @@ def delete_room_area(request, room_area_id):
     except:
         messages.error(request, "Failed to Delete Room Area.")
         return redirect('manage_room_area')
-
