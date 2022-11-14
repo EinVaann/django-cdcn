@@ -726,16 +726,15 @@ def add_room_area_save(request):
         return redirect('add_room_area')
     else:
         room_area_name = request.POST.get('room_area_name')
-
         try:
-            if RoomArea.objects.get(room_area_name=room_area_name):
+            if RoomArea.objects.filter(room_area_name=room_area_name):
                 raise Exception("Room is already existed!")
             roomarea = RoomArea(room_area_name=room_area_name)
             roomarea.save()
             messages.success(request, "Room Area added Successfully!")
             return redirect("manage_room_area")
         except:
-            messages.error(request, "Failed to Add Room Area Year")
+            messages.error(request, "Failed to Add Room Area")
             return redirect("add_room_area")
 
 
