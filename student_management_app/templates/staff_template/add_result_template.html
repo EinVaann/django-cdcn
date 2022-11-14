@@ -1,7 +1,7 @@
 {% extends 'staff_template/base_template.html' %}
 
 {% block page_title %}
-    Add Result
+
 {% endblock page_title %}
 
 {% block main_content %}
@@ -18,7 +18,7 @@
                     {% csrf_token %}
                     <div class="card card-primary">
                     <div class="card-header">
-                        <h3 class="card-title">Add Result</h3>
+                        <h3 class="card-title">Chấm điểm</h3>
                     </div>
                     <!-- /.card-header -->
 
@@ -51,7 +51,7 @@
                         <div class="card-body">
                            
                             <div class="form-group">
-                                <label>Subject </label>
+                                <label>Môn học </label>
                                 <select class="form-control" name="subject" id="subject">
                                     {% for subject in subjects %}
                                         <option value="{{ subject.id }}">{{ subject.subject_name }}</option>
@@ -60,7 +60,7 @@
                             </div>
 
                             <div class="form-group">
-                                <label>Session Year </label>
+                                <label>Kỳ học </label>
                                 <select class="form-control" name="session_year" id="session_year">
                                     {% for session_year in session_years %}
                                         <option value="{{ session_year.id }}">{{ session_year.session_start_year }} to {{ session_year.session_end_year }}</option>
@@ -73,7 +73,7 @@
                         <!-- /.card-body -->
 
                         <div class="card-footer">
-                        <button type="button" class="btn btn-primary" id="fetch_student">Fetch Student</button>
+                        <button type="button" class="btn btn-primary" id="fetch_student">Tìm sinh viên</button>
                         </div>
 
                         {% comment %} Displaying Students Here {% endcomment %}
@@ -115,7 +115,7 @@
                 var json_data=JSON.parse(response);
                 console.log(json_data)
                 //Displaying Attendance Date Input and Students Attendance
-                var div_data="<div class='form-group'><label>Student List</label> <select class='student_list form-control' name='student_list'>"
+                var div_data="<div class='form-group'><label>Danh Sách</label> <select class='student_list form-control' name='student_list'>"
 
                 for(key in json_data)
                 {
@@ -127,11 +127,11 @@
                 div_data+="<div class='form-group'><div class='row'>";
 
                 div_data+="<div class='col-lg-6'>";
-                div_data+="<label>Assignment Marks : </label><input type='text'name='assignment_marks' class='form-control' placeholder='Assignment Marks' />";
+                div_data+="<label>Điểm Giữa Kỳ : </label><input type='text'name='assignment_marks' class='form-control' placeholder='Assignment Marks' />";
                 div_data+="</div>";
 
                 div_data+="<div class='col-lg-6'>";
-                div_data+="<label>Exam Marks : </label><input type='text'name='exam_marks' class='form-control' placeholder='Exam Marks' />";
+                div_data+="<label>Điểm Cuối Kỳ : </label><input type='text'name='exam_marks' class='form-control' placeholder='Exam Marks' />";
                 div_data+="</div>";
 
                 div_data+="</div></div>";
