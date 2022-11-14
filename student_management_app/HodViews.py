@@ -6,6 +6,7 @@ from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.core import serializers
 import json
+from datetime import *  
 
 from student_management_app.models import CustomUser, RoomArea, Staffs, Courses, Subjects, Students, SessionYearModel, FeedBackStudent, FeedBackStaffs
 from .forms import AddStudentForm, EditStudentForm
@@ -276,11 +277,26 @@ def add_session_save(request):
         session_end_year = request.POST.get('session_end_year')
 
         try:
-            sessionyear = SessionYearModel(
+            x = session_start_year.split('-')
+            print(x)
+            b1 = date(int(x[0]), int(x[1]), int(x[2]))
+
+            y = session_end_year.split('-')
+  
+            b2 = date(int(y[0]), int(y[1]), int(y[2]))
+  
+            if b1 < b2:
+                sessionyear = SessionYearModel(
                 session_start_year=session_start_year, session_end_year=session_end_year)
-            sessionyear.save()
-            messages.success(request, "Session Year added Successfully!")
-            return redirect("add_session")
+                sessionyear.save()
+                messages.success(request, "Session Year added Successfully!")
+                return redirect("manage_session")
+    
+            else:
+                messages.error(request, "Failed to Add Session Year")
+                return redirect("add_session")
+
+            
         except:
             messages.error(request, "Failed to Add Session Year")
             return redirect("add_session")
@@ -310,7 +326,7 @@ def edit_session_save(request):
             session_year.save()
 
             messages.success(request, "Session Year Updated Successfully.")
-            return redirect('/edit_session/'+session_id)
+            return redirect("manage_session")
         except:
             messages.error(request, "Failed to Update Session Year.")
             return redirect('/edit_session/'+session_id)
