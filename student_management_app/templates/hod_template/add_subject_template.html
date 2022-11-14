@@ -1,0 +1,130 @@
+{% extends 'hod_template/base_template.html' %}
+
+{% block page_title %}
+    Thêm Môn Học
+{% endblock page_title %}
+
+{% block main_content %}
+
+{% load static %}
+
+<section class="content">
+        <div class="container-fluid">
+
+            <div class="row">
+                <div class="col-md-12">
+                    <!-- general form elements -->
+                    <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Thêm môn học</h3>
+                    </div>
+                    <!-- /.card-header -->
+                    <!-- form start -->
+                    <form role="form" method="POST" action="{% url 'add_subject_save' %}">
+                        {% csrf_token %}
+
+                        
+                                {% comment %} Display Messages {% endcomment %}
+                                {% if messages %}
+                                <div class="form-group">
+                                <div class="col-12">
+                                    {% for message in messages %}
+                                    {% if message.tags == "error" %}
+                                        <div class="alert alert-danger alert-dismissible fade show" role="alert" style="margin-top: 10px;">
+                                        {{ message }}
+                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                        </div>
+                                    {% elif message.tags == "success" %}
+                                        <div class="alert alert-success alert-dismissible fade show" role="alert" style="margin-top: 10px;">
+                                        {{ message }}
+                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                        </div>
+                                    {% endif %}
+                                    {% endfor %}
+                                </div>
+                                </div>
+                                {% endif %}
+                            
+
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label>Tên môn học</label>
+                                <input type="text" class="form-control" name="subject" placeholder="Tên môn học">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Ngành học </label>
+                                <select class="form-control" name="course">
+                                    {% for course in courses %}
+                                        <option value="{{ course.id }}">{{ course.course_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Phòng</label>
+                                <select class="form-control" name="roomarea">
+                                    {% for roomarea in room_areas %}
+                                        <option value="{{ roomarea.id }}">{{ roomarea.room_area_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Giảng viên</label>
+                                <select class="form-control" name="staff">
+                                    {% for staff in staffs %}
+                                        <option value="{{ staff.id }}">{{ staff.first_name }} {{ staff.last_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Thứ</label>
+                                <select class="form-control" name="date">
+                                    <option value="Thứ Hai">Thứ Hai</option>
+                                    <option value="Thứ Ba">Thứ Ba</option>
+                                    <option value="Thứ Tư">Thứ Tư</option>
+                                    <option value="Thứ Năm">Thứ Năm</option>
+                                    <option value="Thứ Sáu">Thứ Sáu</option>
+                                    <option value="Thứ Bảy">Thứ Bảy</option>
+                                    <option value="Chủ Nhật">Chủ Nhật</option>
+                                </select>
+                            </div>
+
+
+                            <div class="form-group">
+                                <label>Giờ bắt đầu </label>
+                                <select class="form-control" name="time">
+                                    <option value="7h">7h00</option>
+                                    <option value="8h">8h00</option>
+                                    <option value="9h">9h00</option>
+                                    <option value="10h">10h00</option>
+                                    <option value="13h">13h00</option>
+                                    <option value="14h">14h00</option>
+                                    <option value="15h">15h00</option>
+                                    <option value="16h">16h00</option>
+                                </select>
+                            </div>
+
+                        </div>
+                        <!-- /.card-body -->
+
+                        <div class="card-footer">
+                        <button type="submit" class="btn btn-primary">Thêm</button>
+                        </div>
+                    </form>
+                    </div>
+                    <!-- /.card -->
+
+                </div>
+            </div>
+
+        </div><!-- /.container-fluid -->
+      </section>
+
+  {% endblock main_content %}
