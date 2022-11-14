@@ -363,6 +363,9 @@ def add_student_save(request):
 
 
             try:
+                user_email = CustomUser.objects.filter(email=email).values_list('id', flat=True)
+                if user_email:
+                    raise Exception("Email invalid!")
                 user = CustomUser.objects.create_user(username=username, password=password, email=email, first_name=first_name, last_name=last_name, user_type=3)
                 user.students.address = address
                 user.students.course_id = course_id
