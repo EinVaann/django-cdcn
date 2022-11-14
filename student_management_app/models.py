@@ -11,6 +11,9 @@ class SessionYearModel(models.Model):
     session_end_year = models.DateField()
     objects = models.Manager()
 
+    def __str__(self):
+        return str(self.session_start_year)+" to "+str(self.session_end_year)
+
 
 
 # Overriding the Default Django Auth User and adding One More Field (user_type)
@@ -44,6 +47,9 @@ class Courses(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     objects = models.Manager()
+
+    def __str__(self):
+        return self.course_name
 
 class RoomArea(models.Model):
     id = models.AutoField(primary_key=True)
