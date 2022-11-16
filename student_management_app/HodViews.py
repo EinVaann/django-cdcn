@@ -708,7 +708,7 @@ def admin_profile_update(request):
                 customuser.set_password(password)
             customuser.save()
             messages.success(request, "Profile Updated Successfully")
-            return redirect('admin_profile')
+            return redirect('/admin_home')
         except:
             messages.error(request, "Failed to Update Profile")
             return redirect('admin_profile')
