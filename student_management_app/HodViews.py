@@ -319,13 +319,26 @@ def edit_session_save(request):
         session_end_year = request.POST.get('session_end_year')
 
         try:
-            session_year = SessionYearModel.objects.get(id=session_id)
-            session_year.session_start_year = session_start_year
-            session_year.session_end_year = session_end_year
-            session_year.save()
+            x = session_start_year.split('-')
+            print(x)
+            b1 = date(int(x[0]), int(x[1]), int(x[2]))
 
-            messages.success(request, "Session Year Updated Successfully.")
-            return redirect("manage_session")
+            y = session_end_year.split('-')
+  
+            b2 = date(int(y[0]), int(y[1]), int(y[2]))
+  
+            if b1 < b2:
+                session_year = SessionYearModel.objects.get(id=session_id)
+                session_year.session_start_year = session_start_year
+                session_year.session_end_year = session_end_year
+                session_year.save()
+
+                messages.success(request, "Session Year Updated Successfully.")
+                return redirect("manage_session")
+            else:
+                messages.error(request, "Failed to Add Session Year")
+                return redirect('/edit_session/'+session_id)
+
         except:
             messages.error(request, "Failed to Update Session Year.")
             return redirect('/edit_session/'+session_id)
